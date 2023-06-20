@@ -1,0 +1,28 @@
+#include <math.h>
+#include <stdbool.h>
+#include <stdio.h>
+
+int main() {
+  int radius = 0, row = 0, column = 0;
+  printf("Enter the radius of the circle: ");
+  scanf("%d", &radius); //takes input
+
+
+  for (int column = 1; column <= (radius * 2 + 1); column++) {    // c for column
+    for (int row = 1; row <= (radius * 2 + 1); row++) {  // r for row
+      //first point is (1,1) , row will have radiusx2 +1 entries (ex. radius 3 has 7 items per row)
+        int rCurrent = row - (radius+1); //changes coordinates
+        int cCurrent = column - (radius+1);//changes coordinates to match normal graphs
+
+        if ((pow(rCurrent, 2) + pow(cCurrent, 2)) <= pow(radius, 2)) {
+          printf("o");  // less than means inside circle
+        } else{
+          printf(".");
+        }
+    }
+      
+    printf("\n"); // new line every radius*2 +1 entreis
+  }
+
+  return 0;
+}
