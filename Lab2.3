@@ -1,0 +1,52 @@
+#include <stdio.h>
+#include <math.h>
+#include <stdbool.h>
+
+int main (){
+
+    double weight=0, height=0, BMI=0;
+    char weightunit1, weightunit2, heightunit1, heightunit2;
+    
+    printf("Enter the body weight: ");
+    scanf("%lf %c %c", &weight, &weightunit1, &weightunit2);
+    printf("Enter the height: ");
+    scanf("%lf %c %c", &height, &heightunit1, &heightunit2);
+    
+    //converts everything to kg and m by checking the characters aka units
+    if (weightunit1 == 'l' && weightunit2=='b'){
+        weight = weight*0.4536;
+        //printf("%lf \n", weight);
+    }
+    
+    if (heightunit1 == 'i' && heightunit2 =='n'){
+        height = height/39.37;
+        //printf("%lf\n", height);
+    }
+    
+    if(heightunit1 == 'f' && heightunit2 == 't'){
+        height= height/3.28;
+        //printf("%lf\n", height);
+    }
+    
+    //calculates bmi
+    BMI=weight/(pow(height,2));
+    printf("%lf", BMI);
+    
+    BMI= round(BMI*10) /10;
+    
+    printf("The Body Mass Index (BMI) is: %.1lf \n", BMI);
+    
+    if(BMI<18.5){
+        printf("Category: Underweight");
+    } else if (BMI>= 18.5 && BMI<=24.9){
+        printf("Category: Healthy Weight");
+    } else if (BMI>= 25 && BMI<=29.9){
+        printf("Category: Overweight");
+    } else if (BMI> 30){
+        printf("Category: Obesity");
+    }
+    
+    
+
+    return 0;
+}
