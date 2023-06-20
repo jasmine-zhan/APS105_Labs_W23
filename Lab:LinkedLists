@@ -1,0 +1,318 @@
+#include "stdio.h"
+#include "stdlib.h"
+#include "string.h"
+#include "stdbool.h"
+/* DO NOT EDIT THE LINES BELOW */
+#define STRING_MAX 1024
+typedef struct node {
+    char *name;
+    int lines;
+    int runtime;
+    int memory_usage;
+    
+    struct node *next;
+} Node;
+
+typedef struct linked_list {
+    Node *head;
+} LinkedList;
+void readInputString(char *, int);
+void readInputNumber(int *);
+void readInputChar(char *);
+
+LinkedList * newList();
+char getCommand();
+
+void handleInsert(LinkedList *);
+void handleDelete(LinkedList *);
+void handleSearch(LinkedList *);
+void handlePrint(LinkedList *);
+void handleQuit(LinkedList *);
+
+int main() {
+    LinkedList *list = newList();
+    char command = '\0';
+    
+    printf("Experimental database entry\n");
+    
+    while (command != 'Q') {
+            command = getCommand();
+        
+            switch (command) {
+                case 'I':
+                    handleInsert(list);
+                    break;
+                case 'D':
+                    handleDelete(list);
+                    break;
+                case 'S':
+                    handleSearch(list);
+                    break;
+                case 'P':
+                    handlePrint(list);
+                    break;
+                case 'Q':
+                    handleQuit(list);
+                    break;
+            }
+    }
+    free(list);
+    return 0;
+}
+/* DO NOT EDIT THE LINES ABOVE */
+void handleInsert(LinkedList *list) { //NEED TO CHECK SAME NAME, AND IF LIST IS EMPTY
+    //max length of a string is 1024 characters
+    int numCharName, numLines, runTime, memoryUsage;
+    printf("\n");
+    printf("Number of characters in file name: ");
+    readInputNumber(&numCharName);
+    
+    char *fileName = (char*)malloc(numCharName + 1);
+    
+    printf("File name: ");
+    readInputString(fileName, numCharName+1);
+    
+    printf("Number of lines in CSV file: ");
+    readInputNumber(&numLines);
+    
+    printf("Experiment runtime (ms): ");
+    readInputNumber(&runTime);
+    
+    printf("Experiment memory usage (B): ");
+    readInputNumber(&memoryUsage);
+    
+    
+    if (list->head == NULL ){//list is empty or new thing needs to be at beginning
+        Node *newNode=(Node *)malloc(sizeof(Node));
+        newNode->name = fileName;
+        newNode->lines = numLines;
+        newNode->runtime = runTime;
+        newNode->memory_usage = memoryUsage;
+        
+        list->head = newNode;
+        list->head->next = NULL;
+    }
+    else if(list->head != NULL && list->head->next==NULL){
+        if (strcmp(fileName, list->head->name) == 0){
+            printf("\nAn entry with that file name already exists.\n");
+        }
+        else if (strcmp(fileName, list->head->name) < 0){//filename needs to be first
+            Node *newNode=(Node *)malloc(sizeof(Node));
+            newNode->name = fileName;
+            newNode->lines = numLines;
+            newNode->runtime = runTime;
+            newNode->memory_usage = memoryUsage;
+            
+            newNode->next=list->head;
+            list->head=newNode;
+        }
+        else if (strcmp(fileName, list->head->name) > 0){//filename needs to be second
+            Node *newNode=(Node *)malloc(sizeof(Node));
+            newNode->name = fileName;
+            newNode->lines = numLines;
+            newNode->runtime = runTime;
+            newNode->memory_usage = memoryUsage;
+            
+            list->head->next=newNode;
+            newNode->next=NULL;
+        }
+        
+    }
+
+    else {
+        bool running = true;
+        while (running){
+            Node *checking = list -> head;
+            while ((checking -> next != NULL) && strcmp(checking->next -> name, fileName)<0){
+                if (strcmp(fileName, checking->name) == 0){
+                    printf("An entry with that file name already exists.");
+                    running=false;
+                }
+                checking = checking -> next;
+            }
+            if (strcmp(fileName, checking->name) == 0){
+                printf("An entry with that file name already exists.\n");
+                running=false;
+            }
+            if (checking->next == NULL && running ==true){//got to end
+                Node *newNode=(Node *)malloc(sizeof(Node));
+                newNode->name = fileName;
+                newNode->lines = numLines;
+                newNode->runtime = runTime;
+                newNode->memory_usage = memoryUsage;
+                
+                newNode->next = NULL;
+                checking->next = newNode;
+                running=false;
+            }
+            else if (strcmp(checking -> next -> name, fileName)>0 && running == true) {
+                Node *newNode=(Node *)malloc(sizeof(Node));
+                newNode->name = fileName;
+                newNode->lines = numLines;
+                newNode->runtime = runTime;
+                newNode->memory_usage = memoryUsage;
+                
+                newNode->next = checking ->next;
+                checking->next = newNode;
+                running = false;
+            }
+        }
+    }
+        
+}
+void handleDelete(LinkedList *list) {
+    // place your code to handle the delete command here
+    char filetoDelete[1024+1];
+    
+    Node *previous = list -> head;
+    printf("\nEnter file name to delete: ");
+    readInputString(filetoDelete, 1024+1);
+    
+    if (list->head == NULL){// empty
+        printf("An entry for file <%s> does not exist.\n", filetoDelete);
+    }
+    else if (list->head != NULL){//first item needs to be deleted
+        if (strcmp(list->head->name, filetoDelete)==0){
+            list->head=list->head->next;
+            free(previous->name);
+            free(previous);
+            printf("Deleting entry for CSV file <%s>\n", filetoDelete);
+        }
+        else {//deleting beyond first one
+            bool deleted = false;
+            while ((previous->next != NULL)){
+                if (strcmp(previous->next->name, filetoDelete)==0){//found
+                    Node *todelete=previous->next;
+                    previous->next=previous->next->next;
+                   free(todelete->name);
+                    free(todelete);
+                    printf("Deleting entry for CSV file <%s>\n", filetoDelete);
+                    deleted=true;
+                    break;
+                }
+                //Node *tempNode=previous->next;
+                
+                previous = previous->next;
+                //previous = tempNode;
+                //free(tempNode);
+                
+            }
+            if (previous->next == NULL && deleted == false){
+                //not in list
+                printf("An entry for file <%s> does not exist.\n", filetoDelete);
+            }
+        }
+    }
+}
+
+void handleSearch(LinkedList *list) {
+// place your code to handle the search command here
+    char filetoFind[1024+1];
+    printf("\nEnter file name to find: ");
+   
+    readInputString(filetoFind, 1024+1);
+    
+    if (list->head == NULL){
+        printf("An entry for file <%s> does not exist.", filetoFind);
+    }
+    
+    else {
+        Node *checking = list -> head;
+        while ((checking->next != NULL) && strcmp(checking->name, filetoFind)!=0){
+            checking=checking->next;
+        }
+        if (checking->next==NULL && strcmp(checking->name, filetoFind)!=0){
+            printf("An entry for file <%s> does not exist.\n", filetoFind);
+        }
+        if(strcmp(checking->name, filetoFind)==0){
+        //printf("\n");
+            printf("File <%s>\n", filetoFind);
+            printf("Lines: %d\n", checking->lines);
+            printf("Runtime (ms): %d\n", checking->runtime);
+            printf("Memory usage (B): %d\n", checking->memory_usage);
+            printf("Throughput: %.2lf\n", (checking->lines)/(checking->runtime/1000.0));
+            //printf("\n");
+        }
+    }
+}
+void handlePrint(LinkedList *list) {
+    Node *current = list -> head;
+    printf ("\nData entries:\n");
+    
+    if(list->head == NULL){
+        printf("There are no data entries.\n");
+    }
+    
+    else{
+        while (current !=NULL){
+        printf("\n");
+            printf("File <%s>\n", current->name);
+            printf("Lines: %d\n", current->lines);
+            printf("Runtime (ms): %d\n", current->runtime);
+            printf("Memory usage (B): %d\n", current->memory_usage);
+            //double timeSec = (current->runtime)/1000.0;
+            printf("Throughput: %.2lf\n", (current->lines)/(current->runtime/1000.0));
+            //printf("\n");
+            current = current->next;
+        }
+    }
+}
+void handleQuit(LinkedList *list) {
+    if (list->head ==NULL){
+        printf("List is empty.");
+    }
+    else {
+        Node *current = list -> head;
+        Node *currentNext = list -> head-> next;
+        while (current != NULL){
+            printf("Deleting entry for CSV file <%s>\n", current->name);
+            currentNext=current->next;
+            free(current);
+            current = currentNext;
+        }
+        
+        current = NULL;
+        currentNext = NULL;
+    }
+}/* DO NOT EDIT THE LINES BELOW */
+void readInputString(char *str, int length) {
+    int i = 0;
+    char c;
+    while (i < length && (c = getchar()) != '\n') {
+        str[i++] = c;
+    }
+    str[i] = '\0';
+}
+void readInputNumber(int *number) {
+    char buf[STRING_MAX];
+    readInputString(buf, STRING_MAX);
+    *number = (int)strtol(buf, (char **)NULL, 10);
+}
+void readInputChar(char *character) {
+    char buf[2];
+    readInputString(buf, 3);
+    *character = buf[0];
+}
+LinkedList * newList() {
+    LinkedList *list = (LinkedList *)malloc(sizeof(LinkedList));
+    list->head = NULL;
+    return list;
+}
+char getCommand() {
+    char command;
+    printf("\nSupported commands are:\n");
+    printf(" I - Insert\n");
+    printf(" D - Delete\n");
+    printf(" S - Search\n");
+    printf(" P - Print\n");
+    printf(" Q - Quit\n");
+    
+    printf("\nPlease select a command: ");
+    readInputChar(&command);
+    while (command != 'I' && command != 'D' && command != 'S' && command != 'P'
+&& command != 'Q') {
+        printf("Invalid command <%c>, please select a command: ", command);
+        readInputChar(&command);
+    }
+    return command;
+}
