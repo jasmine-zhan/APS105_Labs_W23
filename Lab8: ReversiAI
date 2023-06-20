@@ -1,0 +1,411 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "reversi.h"
+#include <stdbool.h>
+
+void printBoard(char board[][26], int n) {
+    printf("  ");
+    for (int i=0; i<n; i++){
+        printf("%c", 'a'+i);
+    }
+    
+    for (int row = 0; row < n; row++) {
+        printf("\n%c ", 'a'+ row);
+          for (int col = 0; col < n; col++) {
+              printf("%c", board[row][col]);
+          }
+        }
+    printf("\n");
+}
+
+bool positionInBounds(int n, int row, int col) {
+    if (row>=0 && row<n && col>=0 && col<n){
+        //printf("here returning true");
+            return true;
+        
+        }
+        else {
+            return false;
+        }
+}
+
+bool checkLegalInDirection(char board[][26], int n, int row, int col,
+                            char colour, int deltaRow, int deltaCol) {
+    char looking, currentValue;
+        if (colour == 'B'){
+            looking = 'W';
+        }
+        if (colour == 'W'){
+            looking = 'B';
+        }
+        int currentR = row + deltaRow, currentC = col + deltaCol;
+        currentValue = board[currentR][currentC];
+        if ((board[currentR][currentC] != looking) || (positionInBounds(n, currentR, currentC)==false)){
+            //printf("here returning false");
+            return false;
+        }
+        while ((board[currentR][currentC] == looking) && (positionInBounds(n, currentR, currentC)==true)){
+            currentR = currentR + deltaRow;
+            currentC = currentC + deltaCol;
+
+            //printf("here");
+        }
+        //gets to end of line of other colour
+        if ((board[currentR][currentC] == colour) && (positionInBounds(n, currentR, currentC)==true)){
+        //printf("here");
+            return true;
+        }
+        return false;
+    }
+
+bool possMove(char board[][26], char colour, int size, char r, char c){
+    char looking;
+        //bool printed = false;
+        //char *checkingR, *checkingC;
+    if (colour == 'B'){
+        looking = 'W';
+    }
+    if (colour == 'W'){
+        looking = 'B';
+    }
+        
+    int row = r - 'a';
+    int col = c - 'a';
+
+            if (board[row][col] == 'U'){
+                for (int deltaRow = -1; deltaRow<2; deltaRow++){
+                    for (int deltaCol = -1; deltaCol<2; deltaCol++){
+                        if (((deltaRow==0) && (deltaCol==0)) == false){
+                            if (checkLegalInDirection(board, size, row, col, colour, deltaRow, deltaCol)==true){
+                                return true;
+                                   
+                                }
+                            }
+                        }
+                    }
+                }
+    return false;
+}
+
+
+    
+
+void flipTiles(char board[][26], char r, char c, char colour, int size){
+    char looking;
+    //char *checkingR, *checkingC;
+    if (colour == 'B'){
+        looking = 'W';
+    }
+    if (colour == 'W'){
+        looking = 'B';
+    }
+    
+    board[r-'a'][c-'a']=colour;
+    
+    for (int deltaRow = -1; deltaRow<2; deltaRow++){
+        for (int deltaCol = -1; deltaCol<2; deltaCol++){
+            if (((deltaRow==0) && (deltaCol==0)) == false){
+                int indexR=r-'a', indexC=c-'a';
+                if (checkLegalInDirection(board, size, indexR, indexC, colour, deltaRow, deltaCol)==true){
+                    //printf("here");
+                    int newR = indexR + deltaRow, newC = indexC + deltaCol;
+                    while (board[newR][newC] == looking){
+                        board[newR][newC]=colour;
+                        newR = newR + deltaRow;
+                        newC = newC + deltaCol;
+                    }
+                }
+            }
+        }
+    }
+}
+
+int calcOppScore(char board[26][26], int n, char turn) {
+    int score=0;
+    char looking;
+    //char *checkingR, *checkingC;
+    if (turn == 'B'){
+        looking = 'W';
+    }
+    if (turn == 'W'){
+        looking = 'B';
+    }
+    
+    for (int rowChecking=0; rowChecking<n; rowChecking++){
+        for (int colChecking=0; colChecking<n; colChecking++){
+            int currentscore=n*n;
+            //goes thru all possitions on board
+            if (possMove(board, turn, n, rowChecking+'a', colChecking+'a') == true){ //possible move
+                for (int deltaRow = -1; deltaRow<2; deltaRow++){
+                    for (int deltaCol = -1; deltaCol<2; deltaCol++){
+                        if ((((deltaRow==0) && (deltaCol==0)) == false) && (checkLegalInDirection(board, n, rowChecking, colChecking, turn, deltaRow, deltaCol)==true)){
+                            int newR = rowChecking + deltaRow, newC = colChecking + deltaCol;
+                            currentscore++;
+                            while (board[newR][newC] == looking){
+                                newR = newR + deltaRow;
+                                newC = newC + deltaCol;
+                                currentscore++;
+                            }
+                        }
+                    }
+                }
+               
+            }
+            if (currentscore < score){
+                score=currentscore;
+            }
+        }
+    }
+    //printf("score= %d", score);
+    if(score<n*n){
+        return score;
+    }
+    return 0;
+}
+
+int makeMove(char board[26][26], int n, char turn, int *row, int *col) {
+    int Overalldiff=0;
+    char looking;
+    //char *checkingR, *checkingC;
+    if (turn == 'B'){
+        looking = 'W';
+    }
+    if (turn == 'W'){
+        looking = 'B';
+    }
+    
+    for (int rowChecking=0; rowChecking<n; rowChecking++){
+        for (int colChecking=0; colChecking<n; colChecking++){
+            int currentscore=0;
+            //goes thru all possitions on board
+            if (possMove(board, turn, n, rowChecking+'a', colChecking+'a') == true){ //possible move
+                for (int deltaRow = -1; deltaRow<2; deltaRow++){
+                    for (int deltaCol = -1; deltaCol<2; deltaCol++){
+                        if ((((deltaRow==0) && (deltaCol==0)) == false) && (checkLegalInDirection(board, n, rowChecking, colChecking, turn, deltaRow, deltaCol)==true)){
+                            int newR = rowChecking + deltaRow, newC = colChecking + deltaCol;
+                            currentscore++;
+                            while (board[newR][newC] == looking){
+                                newR = newR + deltaRow;
+                                newC = newC + deltaCol;
+                                currentscore++;
+                            }
+                        }
+                    }
+                }
+                char tempBoard[n][n];
+                for (int r =0; r<n; r++){
+                    for(int c = 0; c<n;c++){
+                        tempBoard[r][c] = board[r][c];
+                    }
+                }
+                tempBoard[rowChecking][colChecking]=turn;
+                
+                int Opplowest = calcOppScore(tempBoard, n, looking);
+                currentscore = currentscore - Opplowest;
+                
+                if ((rowChecking == 0 && rowChecking ==0) || (rowChecking ==0 && colChecking == n-1) || (rowChecking==n-1 && colChecking == 0) || (rowChecking == n-1 && rowChecking == n-1)){
+                            currentscore +=2;}
+                
+                else if (rowChecking == 0 || rowChecking == n-1 || colChecking == 0 || colChecking ==n-1){
+                    score +=2;}
+                
+            }
+            if (currentscore > Overalldiff){
+                Overalldiff=currentscore;
+                *row=rowChecking;
+                *col=colChecking;
+            }
+        }
+    }
+    //printf("score= %d", score);
+    if(Overalldiff>0){
+        return 1;
+    }
+    return 0;
+}
+        
+
+bool boardFull (char board[26][26], int n){
+    bool full = true;
+    for (int r =0; r<n; r++){
+        for (int c=0; c<n; c++){
+            if (board[r][c] == 'U')
+            full=false;
+        }
+    }
+    return full;
+}
+
+void Winner (char board[26][26], int n){
+    int numW=0;
+    int numB=0;
+    
+    for (int i=0; i<n; i++){
+        for (int j=0; j<n; j++){
+            if (board[i][j] == 'B')
+                numB++;
+            if (board[i][j] == 'W')
+                numW++;
+        }
+    }
+    if (numB>numW){
+        printf("B player wins.");
+    }
+    if (numB<numW){
+        printf("W player wins.");
+    }
+    if (numB==numW){
+        printf("Draw!");
+    }
+    
+}
+
+
+int main(void) {
+    int dim = 0;
+    char computerColour, humanColour;
+    char rowConsideringHuman, colConsideringHuman;
+    int rowComputer, colComputer;
+    bool running = true;
+    
+    
+    printf("Enter the board dimension: ");
+    scanf("%d", &dim);
+    
+    printf("Computer plays (B/W): ");
+    scanf(" %c", &computerColour);
+    
+    if (computerColour=='B'){
+        humanColour = 'W';
+    }
+    
+    if (computerColour=='W'){
+        humanColour = 'B';
+    }
+    
+    //create empty board
+    char original[26][26];
+    for (int n=0; n<26; n++){
+        for (int k=0; k<26; k++){
+            original[n][k] = 'U';
+        }
+    }
+    
+    // actual board being used
+    char Gboard[26][26];
+    for (int row = 0; row < dim; row++) {
+        for (int col = 0; col < dim; col++) {
+            if ( ((row == (dim/2)-1 )&&(col == (dim/2)-1 ))  || ( (row == ((dim/2))) && col == ((dim/2)))){
+                Gboard[row][col] = 'W';
+            }
+            else if ((row == (dim/2)-1) && (col == (dim/2))){
+                Gboard[row][col] = 'B';
+            }
+            
+            else if ((col == (dim/2)-1) && (row == (dim/2))){
+                Gboard[row][col] = 'B';
+            }
+            else Gboard[row][col] = original[row][col];
+        }
+    }
+    
+    printBoard(Gboard, dim);
+    
+    while (running==true && computerColour=='B' && (boardFull(Gboard, dim)==false)){
+        
+        int Bavail = makeMove(Gboard, dim, computerColour, &rowComputer, &colComputer);
+         
+           // makeMove(Gboard, dim, computerColour, &rowComputer, &colComputer);
+            if (Bavail == 0)
+                printf("B player has no valid move.\n");
+            
+            if (Bavail == 1){
+                printf("Computer places %c at %c%c.\n", computerColour, rowComputer+'a', colComputer+'a');
+                flipTiles(Gboard, rowComputer+'a', colComputer+'a', computerColour, dim);
+                printBoard(Gboard, dim);
+            }
+            
+            //now whites turn
+            
+        
+        bool available = false;
+        for (int i=0; i<dim; i++){
+                for (int j=0; j<dim; j++){
+                    if (possMove(Gboard, 'W', dim, i+'a', j+'a')==true){
+                        available=true;
+                    }
+                }
+            }
+        if (available == false){
+            printf("W player has no valid move.\n");
+        }
+        
+        if (available == true){
+            printf("Enter move for colour W (RowCol): ");
+            scanf(" %c%c", &rowConsideringHuman, &colConsideringHuman);
+            
+            bool valid = possMove(Gboard, humanColour, dim, rowConsideringHuman, colConsideringHuman);
+            
+            if (valid==true){
+                flipTiles(Gboard, rowConsideringHuman, colConsideringHuman, humanColour, dim);
+                    printBoard(Gboard, dim);
+                }
+            if (valid==false && boardFull(Gboard, dim)==false){
+                printf("Invalid move.\n");
+                //printf("%c player wins.", computerColour);
+                running=false;
+            }
+            
+        }
+           
+    }
+    
+    while (running==true && computerColour=='W' && (boardFull(Gboard, dim)==false)){
+           
+            //now whites turn
+            
+        bool available = false;
+        for (int i=0; i<dim; i++){
+                for (int j=0; j<dim; j++){
+                    if (possMove(Gboard, 'B', dim, i+'a', j+'a')==true){
+                        available=true;
+                    }
+                }
+            }
+        if (available == false){
+            printf("B player has no valid move.\n");
+        }
+        else if (available==true){
+            printf("Enter move for colour B (RowCol): ");
+            scanf(" %c%c", &rowConsideringHuman, &colConsideringHuman);
+            bool valid = possMove(Gboard, humanColour, dim, rowConsideringHuman, colConsideringHuman);
+            
+            if (valid==true){
+                flipTiles(Gboard, rowConsideringHuman, colConsideringHuman, humanColour, dim);
+                    printBoard(Gboard, dim);
+                }
+            if (valid==false){
+                printf("Invalid move.\n");
+                //printf("%c player wins.", computerColour);
+                running=false;
+            }
+        }
+            
+            
+            
+        int Wavail = makeMove(Gboard, dim, computerColour, &rowComputer, &colComputer);
+            // makeMove(Gboard, dim, computerColour, &rowComputer, &colComputer);
+             if (Wavail == 0 && boardFull(Gboard, dim)==false)
+                 printf("W player has no valid move.\n");
+             
+             if (Wavail == 1){
+                 printf("Computer places %c at %c%c.\n", computerColour, rowComputer+'a', colComputer+'a');
+                 flipTiles(Gboard, rowComputer+'a', colComputer+'a', computerColour, dim);
+                 printBoard(Gboard, dim);
+             }
+        
+        }
+    
+    Winner(Gboard, dim);
+  return 0;
+}
