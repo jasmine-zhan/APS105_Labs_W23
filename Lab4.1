@@ -1,0 +1,112 @@
+#include <stdio.h>
+#include <math.h>
+#include <stdbool.h>
+
+// defining functions
+int getAscendingOrderedDigits(int number) {
+    int digits[10] = {0};
+    while (number > 0) {
+        digits[number % 10]++;
+        number /= 10;
+    }
+    int i = 0;
+    while (i < 10) {
+        if (digits[i] > 0) {
+            number *= 10;
+            number += i;
+            digits[i]--;
+        } else {
+            i++;
+        }
+    }
+    return number;
+}
+
+int getDescendingOrderedDigits(int num){
+    //ascending num comes in order of 1234
+    int d4, d3, d2, d1, descendingNum;
+     d4 = num % 10;
+     num = (num - d4)/10;
+
+     d3 = num % 10;
+     num = (num - d3)/10;
+ 
+     d2 = num % 10;
+     num = (num - d2)/10;
+
+     d1 = num;
+    
+    descendingNum = (d4*1000) + (d3* 100) + (d2*10) + d1;
+    return descendingNum;
+}
+
+int getNumber() {
+    int num=0;
+    printf("Enter a number (-1 to stop): ");
+    scanf("%d", &num);
+    return num;
+}
+
+
+int main() {
+    bool running = true;
+    
+    while (running==true){
+        bool fourDigits= true, constantNotReached = true;
+        int numberOriginal=0, currentNumber=0;
+        
+        numberOriginal = getNumber();
+        //printf("%d", numberOriginal);
+        if (numberOriginal == -1){
+            running = false;
+            break;
+        }
+        else if (numberOriginal<1000){
+            printf("Error: The number is too small.\n");
+            fourDigits = false;
+        }
+        
+        else if (numberOriginal>9999){
+            printf("Error: The number is too large.\n");
+            fourDigits = false;
+        }
+        
+        int ascendingOrder=0, descendingOrder=0, difference=0, iterationCounter=1;
+        currentNumber = numberOriginal;
+        
+        if (numberOriginal == 6174){
+            printf("Number %d: %d\n", iterationCounter, currentNumber);
+            printf("Kaprekar's Constant was reached in %d iteration(s)\n", iterationCounter-1);
+            constantNotReached = false;
+        }
+        
+        while (fourDigits == true && constantNotReached == true){
+           
+            printf("Number %d: %d\n", iterationCounter, currentNumber);
+               ascendingOrder = getAscendingOrderedDigits(currentNumber);
+               descendingOrder = getDescendingOrderedDigits(ascendingOrder);
+               
+            
+               if (currentNumber == 6174){
+                   printf("Kaprekar's Constant was reached in %d iteration(s)\n", iterationCounter-1);
+                   constantNotReached = false;
+                   
+               } else{
+                   //printf("asedning: %d\n", ascendingOrder);
+                   //printf("descending: %d\n", descendingOrder);
+           
+                      difference = descendingOrder - ascendingOrder;
+                  // printf("diff: %d\n", difference);
+                  
+                   currentNumber=difference;
+                   iterationCounter +=1;
+                   
+               }
+        }
+        
+       
+       
+    }
+    
+    return 0;
+}
