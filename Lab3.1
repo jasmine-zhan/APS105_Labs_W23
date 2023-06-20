@@ -1,0 +1,36 @@
+#include <math.h>
+#include <stdbool.h>
+#include <stdio.h>
+
+int main() {
+  char operator= 0;
+  int baseOriginal = 0, num1 = 0, num2 = 0, baseWanted = 0;
+
+  printf("Give input ($ to stop): ");
+  scanf("%c %d %d %d %d %d", &operator, & baseOriginal, &num1, &num2,
+        &baseWanted);
+
+  while (operator!= '$') {
+    if ((operator!= '+') || (operator!= '-') || (operator!= '*') ||
+        (operator!= '/')) {
+      printf("Invalid operator");
+      printf("Give input ($ to stop): ");
+      scanf("%c %d %d %d %d %d", &operator, & baseOriginal, &num1, &num2,
+            &baseWanted);
+    } else if ((baseOriginal < 2) || (baseOriginal > 10) || (baseWanted < 2) ||
+               (baseWanted > 10)) {
+      printf("Invalid base");
+      printf("Give input ($ to stop): ");
+      scanf("%c %d %d %d %d %d", &operator, & baseOriginal, &num1, &num2,
+            &baseWanted);
+    }  // check digit in base
+
+    else {
+    }
+
+    return 0;
+  }
+
+
+return 0;
+}
