@@ -1,0 +1,22 @@
+#include <stdio.h>
+#include <math.h>
+
+int main (){
+
+    // setting up variables and user inputs
+    double X=0, Y=0, H=0, T=0;
+    printf("Enter X: ");
+    scanf("%lf", &X);
+
+    printf("Enter Y: ");
+    scanf("%lf", &Y);
+
+    // calculations
+    H = sqrt(pow(X,2) + pow(Y,2));
+    T = asin(Y/H) * 180 / M_PI;
+
+    printf("The Hypotenuse Length is: %.1lf \n", H);
+    printf("The Angle Theta is %.1lf degrees", T);
+
+    return 0;
+}
