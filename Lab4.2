@@ -1,0 +1,82 @@
+#include <stdio.h>
+#include <math.h>
+#include <stdbool.h>
+
+int main() {
+    bool running=true;
+    
+    while(running==true){
+        int order=0;
+        bool validInput=true;
+        
+        printf("Enter the order of the function: ");
+        scanf("%d", &order);
+        
+        if (order == -1){
+            running=false;
+        } else if (order<0 || order>3){
+            printf("The order must be between [0,3].\n");
+            validInput=false;
+        }
+        
+        int a=0, b=0, c=0, d=0;
+        
+        switch (order) {
+            case 0:
+                printf("Enter coefficient of x^0: ");
+                scanf("%d", &d);
+                break;
+            case 1:
+                printf("Enter coefficient of x^0: ");
+                scanf("%d", &d);
+                printf("Enter coefficient of x^1: ");
+                scanf("%d", &c);
+                break;
+            case 2:
+                printf("Enter coefficient of x^0: ");
+                scanf("%d", &d);
+                printf("Enter coefficient of x^1: ");
+                scanf("%d", &c);
+                printf("Enter coefficient of x^2: ");
+                scanf("%d", &b);
+                break;
+            case 3:
+                printf("Enter coefficient of x^0: ");
+                scanf("%d", &d);
+                printf("Enter coefficient of x^1: ");
+                scanf("%d", &c);
+                printf("Enter coefficient of x^2: ");
+                scanf("%d", &b);
+                printf("Enter coefficient of x^3: ");
+                scanf("%d", &a);
+                break;
+        }
+        
+
+        while (validInput==true && running ==true){
+            int row=1, column=1;
+            for (int column = 1; column <= 21; column++) {    // c for column
+                for (int row = 1; row <= 21; row++) {  // r for row
+                //first point is (1,1)
+                int rCurrent = row-11; //changes coordinates
+                int cCurrent = column-11;//changes coordinates to match normal graphs
+
+                    
+                    if ( ((a*pow(rCurrent,3)) + (b*pow(rCurrent,2)) + c*(rCurrent) + d) == -1* cCurrent ) {
+                        printf(" * ");
+                    } else if (rCurrent == 0) {
+                        printf(" | ");
+                    } else if (cCurrent == 0){
+                        printf(" - ");
+                    } else {
+                        printf("   ");
+                    }
+                }
+                printf("\n");
+            }
+            break;
+        }
+    }
+
+    return 0;
+}
