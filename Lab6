@@ -1,0 +1,224 @@
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+oid getInput(int* row, int* col, int Size) {
+    bool valid = false;
+    printf("Enter user input: ");
+    while (valid == false){
+        scanf("%d%d", row, col);
+        if (validRowCol(*row, *col, Size) == true)
+            valid = true;
+        else printf("Please enter your row and col to be between 0 and Size - 1: ");
+    }
+}
+
+bool validRowCol(int row, int col, int Size) {
+    if (row>=0 && row<=(Size-1) && col>=0 && col<=(Size-1)){
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+void getLevelAndDimensions(int* Size, int* levelOfDiff, const int maxDim) {
+    bool valid = false;
+    printf("Enter the difficulty level: ");
+    while (!valid){
+        scanf("%d", levelOfDiff);
+        if (*levelOfDiff >= 1 && *levelOfDiff<=maxDim){
+            valid = true;
+        }
+        else printf("Please enter a difficulty level between 1 and 23: ");
+        }
+        bool dimValid = false;
+        printf("Enter the dimensions of the grid: ");
+        while (valid == true && dimValid==false){
+            scanf("%d", Size);
+            if (*Size>=*levelOfDiff && *Size<maxDim){
+                dimValid = true;
+                return;
+            }
+            printf("Please enter dimensions >= %d: ", *levelOfDiff);
+        }
+    }
+
+
+void printBoard(int Size, int grid[][Size]) {
+    for (int r=0; r<Size; r++){
+        for (int c=0; c<Size; c++){
+            printf("%d", grid[r][c]);
+        }
+        printf("\n");
+    }
+}
+
+int calculateScoreInDir(int row, int col, int direction, int Size,
+                        char userArray[][Size]) {
+    int score=0;
+    int newR = row, newC = col;
+    int *r = &newR;
+    int *c= &newC;
+    bool running = true;
+    while (running==true ){
+        //printf("value at square: %c", userArray[row][col]);
+        if (userArray[row][col] == '0'){
+            score = 0;
+            running = false;
+        }
+        
+        bool end = false;
+        while (end == false){
+            updateRowCol( r, c, direction, true);
+            if (userArray[*r][*c] == '0' || validRowCol(*r, *c, Size)==false){
+                updateRowCol( r, c, direction, false);
+                end = true; //got to the end
+            }
+        }
+        
+        bool consecutiveEnd = false;
+        while (consecutiveEnd == false && running){
+            score += 1;
+            updateRowCol( r, c , direction, false);
+            //printf("current: %d %d\n", *r, *c);
+            if (userArray[*r][*c] == '0' || validRowCol(*r, *c, Size)==false){
+                consecutiveEnd = true;
+                running = false;
+            }
+           
+        }
+    }
+    return score;
+}
+
+void updateRowCol(int* row, int* col, int dir, bool forward) {
+    if (forward == true && dir==0){
+        *row -= 1; //no change to col
+    }
+    else if (forward == true && dir==1){
+        *row -= 1;
+        *col +=1;
+    }
+    else if (forward == true && dir==2){
+        *col +=1;
+    }
+    else if (forward == true && dir==3){
+        *row -= 1;
+        *col -=1;
+    }
+    else if (forward == false && dir==0){
+        *row += 1;
+    }
+    else if (forward == false && dir==1){
+        *row += 1;
+        *col -=1;
+    }
+    else if (forward == false && dir==2){
+        *col -=1;
+    }
+    else if (forward == false && dir==3){
+        *row += 1;
+        *col +=1;
+    }
+}
+
+bool validRowCol(int row, int col, int Size) {
+    if (row>=0 && row<=(Size-1) && col>=0 && col<=(Size-1)){
+            return true;
+        }
+        else {
+            return false;
+        }
+}
+
+bool gameStatus(int Size, char userArray[][Size], int difficultyLevel) {
+    bool status=false;
+    for (int r=0; r<Size; r++){
+        for(int c=0; c<Size; c++){
+            for (int d=0; d<4; d++){
+                if (calculateScoreInDir(r, c, d, Size, userArray) == difficultyLevel){
+                    status = true;
+                }
+               
+            }
+        }
+    }
+    return status;
+}
+
+
+int main(void) {
+  const int maxDim = 23;
+  int Size = 0, difficultyLevel = 0;
+
+  getLevelAndDimensions(&Size, &difficultyLevel, maxDim);
+
+  int copy[23][23] = {
+      {1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1},
+      {1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1},
+      {0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0},
+      {1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1},
+      {1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1},
+      {0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0},
+      {1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1},
+      {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1},
+      {1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1},
+      {1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1},
+      {0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0},
+      {1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1},
+      {0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1},
+      {0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1},
+      {1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1},
+      {0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1},
+      {0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0},
+      {0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1},
+      {1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0},
+      {1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1},
+      {1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1},
+      {1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1}};
+
+  char grid[Size][Size];
+  for (int row = 0; row < Size; row++) {
+    for (int col = 0; col < Size; col++) {
+      grid[row][col] = copy[row][col] + '0';
+    }
+  }
+     bool status = gameStatus(Size, grid, difficultyLevel);
+    while (status == false){
+        int randRow = getRand(Size);
+        int randCol = getRand(Size);
+        grid[randRow][randCol] = '1';
+        if (gameStatus(Size, grid, difficultyLevel) == true)
+            status = true;
+    }
+
+  int userInputRow = 0, userInputCol = 0;
+
+  // test gameStatus
+  char userArray[Size][Size];
+  for (int row = 0; row < Size; row++) {
+    for (int col = 0; col < Size; col++) {
+      userArray[row][col] = '-';
+    }
+  }
+  bool gameOver = true;
+  int steps = 0;
+  do {
+    getInput(&userInputRow, &userInputCol, Size);
+    userArray[userInputRow][userInputCol] = grid[userInputRow][userInputCol];
+    printBoard(Size, userArray);
+
+    gameOver = gameStatus(Size, userArray, difficultyLevel);
+    steps++;
+  } while (!gameOver && steps < Size * Size);
+  if (steps == Size * Size) {
+    printf("Not a valid game!");
+  } else {
+    printf("Game over!\n");
+    printf("Your score is %d", Size * Size - steps);
+  }
+
+  return 0;
+}
